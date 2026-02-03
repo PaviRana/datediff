@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Date Difference Calculator</title>
+  <style>
+    :root { color-scheme: light dark; }
+
+    body {
+      font-family: system-ui, Arial, sans-serif;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #eef2f7;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .container {
+      max-width: 520px;
+      padding: 24px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+      text-align: center;
+      transition: background 0.3s, box-shadow 0.3s, color 0.3s;
+    }
+
+    h1 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: #333;
+    }
+
+    fieldset {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 14px;
+      text-align: left;
+      background: #fafafa;
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    label {
+      display: block;
+      margin: 8px 0 4px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #333;
+    }
+
+    input[type="date"] {
+      width: 100%;
+      padding: 8px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="checkbox"] {
+      margin-right: 6px;
+    }
+
+    .actions {
+      margin-top: 16px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 10px 14px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      border-radius: 6px;
+      border: none;
+      background: #007bff;
+      color: #fff;
+      font-weight: 500;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    button:hover { background: #0056b3; }
+    button:active { transform: scale(0.96); }
+
+    #resetBtn { background: #dc3545; }
+    #resetBtn:hover { background: #a71d2a; }
+
+    #themeToggle { background: #6c757d; }
+    #themeToggle:hover { background: #495057; }
+
+    .out {
+      margin-top: 18px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #f1f3f5;
+      font-weight: 500;
+      color: #333;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .error {
+      color: #b00020;
+      font-weight: bold;
+    }
+
+    /* 🌙 Dark Mode */
+    body.dark-mode {
+      background: #121212;
+      color: #f1f1f1;
+    }
+    body.dark-mode .container {
+      background: #1e1e1e;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.7);
+      color: #f1f1f1;
+    }
+    body.dark-mode h1 { color: #f1f1f1; }
+    body.dark-mode fieldset {
+      border: 1px solid #333;
+      background: #2a2a2a;
+    }
+    body.dark-mode label { color: #ddd; }
+    body.dark-mode input[type="date"] {
+      background: #2a2a2a;
+      color: #fff;
+      border: 1px solid #444;
+    }
+    body.dark-mode input[type="checkbox"] { accent-color: #66aaff; }
+    body.dark-mode .out {
+      background: #2d2d2d;
+      color: #f1f1f1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Date Difference Calculator</h1>
+    
+    <fieldset>
+      <label for="startDate">Start Date</label>
+      <input type="date" id="startDate">
+    </fieldset>
+    
+    <fieldset>
+      <label for="endDate">End Date</label>
+      <input type="date" id="endDate">
+    </fieldset>
+    
+    <fieldset>
+      <label>
+        <input type="checkbox" id="excludeWeekends"> Exclude Saturdays & Sundays
+      </label>
+    </fieldset>
+    
+    <div class="actions">
+      <button id="calcBtn">Calculate Difference</button>
+      <button id="resetBtn" type="button">Reset</button>
+      <button id="themeToggle" type="button">🌙 Dark Mode</button>
+    </div>
+    
+    <div id="output" class="out" role="status" aria-live="polite"></div>
+  </div>
+
+  <script>
+    function calculateDifference() {
+      const startInput = document.getElementById("startDate").value;
+      const endInput = document.getElementById("endDate").value;
+      const excludeWeekends = document.getElementById("excludeWeekends").checked;
+      const out = document.getElementById("output");
+
+      if (!startInput || !endInput) {
+        out.innerHTML = '<span class="error">Please select both start and end dates.</span>';
+        return;
+      }
+
+      const startDate = new Date(startInput);
+      const endDate = new Date(endInput);
+
+      if (endDate < startDate) {
+        out.innerHTML = '<span class="error">End Date cannot be before Start Date.</span>';
+        return;
+      }
+
+      let totalDays = 0;
+      let currentDate = new Date(startDate);
+
+      while (currentDate <= endDate) {
+        const day = currentDate.getDay(); // 0 = Sunday, 6 = Saturday
+        if (excludeWeekends && (day === 0 || day === 6)) {
+          // skip weekends
+        } else {
+          totalDays++;
+        }
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+
+      // Convert to years, months, days (approx)
+      const years = Math.floor(totalDays / 365);
+      const months = Math.floor((totalDays % 365) / 30);
+      const days = (totalDays % 365) % 30;
+
+      out.textContent = `Difference: ${years} years, ${months} months, ${days} days (Total: ${totalDays} days)`;
+    }
+
+    function resetForm() {
+      document.getElementById("startDate").value = '';
+      document.getElementById("endDate").value = '';
+      document.getElementById("excludeWeekends").checked = false;
+      document.getElementById("output").textContent = '';
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle("dark-mode");
+      document.getElementById("themeToggle").textContent =
+        document.body.classList.contains("dark-mode") ? "☀️ Light Mode" : "🌙 Dark Mode";
+    }
+
+    document.getElementById("calcBtn").addEventListener("click", calculateDifference);
+    document.getElementById("resetBtn").addEventListener("click", resetForm);
+    document.getElementById("themeToggle").addEventListener("click", toggleTheme);
+  </script>
+</body>
+</html>
